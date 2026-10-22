@@ -25,6 +25,14 @@ python3 -m http.server 8000 -d dist
 
 Open <http://127.0.0.1:8000/>.
 
+## Tests
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+The suite copies the builder and sample content into a temporary directory, rebuilds the site, and checks the rendered brief, the reading page counts, the about page, and that no private markers leak into the output.
+
 ## Layout
 
 ```text
@@ -37,6 +45,7 @@ content/
   briefs/               daily briefs as Markdown (YYYY-MM-DD*.md)
   reading.json          books, chapters, dates, quotes, notes
   stats.md              reading stats tables and monthly time
+tests/                  build smoke tests (unittest)
 ```
 
 ## Writing a brief

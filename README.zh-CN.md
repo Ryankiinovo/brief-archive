@@ -23,7 +23,17 @@ python3 build_site.py
 python3 -m http.server 8000 -d dist
 ```
 
-打开 <http://127.0.0.1:8000/>。构建会生成：
+打开 <http://127.0.0.1:8000/>。
+
+## 测试
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+测试会把构建脚本与示例内容复制到临时目录重新构建，检查简报、摘录页数量、关于页，以及输出里没有私人标记。
+
+构建会生成：
 
 ```text
 dist/
@@ -46,6 +56,7 @@ content/
   briefs/               每日简报 Markdown（文件名 YYYY-MM-DD*.md）
   reading.json          阅读摘录数据（书籍、章节、日期、原文、批注）
   stats.md              阅读统计（Markdown 表格 + 逐月时长）
+tests/                  构建冒烟测试（unittest）
 ```
 
 ## 写一期简报

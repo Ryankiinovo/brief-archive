@@ -8,4 +8,5 @@ github/build_site.py
 github/reading_archive.py
 github/content/
 github/site/
+github/tests/
 github/publish.allowlist

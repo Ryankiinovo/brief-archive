@@ -360,7 +360,15 @@ def render_body(
     local_minutes = sum(int(book.get("readingMinutes") or 0) for book in books)
     excerpt_count = len(excerpts)
     note_count = sum(1 for row in excerpts if row.get("note"))
-    source_blocks = sum(int(book.get("sourceHighlightCount") or 0) for book in books)
+    source_blocks = sum(
+        int(book.get("sourceHighlightCount") or book.get("source_highlight_count") or book.get("highlight_count") or 0)
+        for book in books
+    )
+    source_note = (
+        f"源文件 {source_blocks} 个划线块，按原文去重后为 {excerpt_count} 条。"
+        if source_blocks > excerpt_count
+        else ""
+    )
     finished = sum(1 for book in books if book.get("status") == "finished")
     reading = sum(1 for book in books if book.get("status") == "reading")
     shelf = "".join(_shelf_card(book, index) for index, book in enumerate(books, 1))
@@ -440,7 +448,7 @@ def render_body(
       <div class="reading-section-head">
         <span class="section-no">03</span>
         <h2 id="excerptsTitle">我的摘录</h2>
-        <p>{excerpt_count} 条摘录，其中 {note_count} 条带批注。原文版权归原作者，批注为原创；源文件 {source_blocks} 个划线块，按原文去重后为 {excerpt_count} 条。</p>
+        <p>{excerpt_count} 条摘录，其中 {note_count} 条带批注。原文版权归原作者，批注为原创。{source_note}</p>
       </div>
       <div class="excerpt-toolbar">
         <div class="view-switch" role="group" aria-label="摘录视图">
@@ -493,7 +501,7 @@ python3 -m http.server 8000 -d dist</code></pre>
         </div>
         <div class="principles">
           <div><h3>原文只作对照</h3><p>摘录原文用于定位与理解，版权归原作者；这里公开的是个人阅读记录与自己的判断，不替代原书。</p></div>
-          <div><h3>口径写清楚</h3><p>官方 {esc(lifetime.get("notes", note_count))} 条笔记不等于这里的 {note_count} 条本地批注；源文件 {source_blocks} 个划线块去重后为 {excerpt_count} 条摘录。</p></div>
+          <div><h3>口径写清楚</h3><p>官方 {esc(lifetime.get("notes", note_count))} 条笔记不等于这里的 {note_count} 条本地批注；这里是去重后的 {excerpt_count} 条摘录。</p></div>
           <div><h3>可复核</h3><p>每个数字都能由 Obsidian 笔记与本项目的构建脚本重新算出来，页面只是产物。</p></div>
         </div>
       </div>
