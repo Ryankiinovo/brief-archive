@@ -4,6 +4,8 @@ A small static-site generator for daily briefs and a personal reading archive, b
 
 ![preview](assets/preview.png)
 
+Live demo: <https://ryankiinovo.github.io/brief-archive/>
+
 No Node, database, or frontend framework is required. The output is plain HTML / CSS / JS that can be hosted anywhere.
 
 ## Features

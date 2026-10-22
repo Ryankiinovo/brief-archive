@@ -4,6 +4,8 @@
 
 ![预览](assets/preview.png)
 
+在线预览：<https://ryankiinovo.github.io/brief-archive/>
+
 只用 Python 3 标准库构建，没有 Node、数据库或前端框架依赖。构建产物是纯 HTML / CSS / JS，可以放到任意静态托管。
 
 ## 特性
