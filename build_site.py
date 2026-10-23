@@ -171,7 +171,7 @@ def render_header(active: str, right: str = "", brand_sub: str = "Notes") -> str
 def render_footer(active: str, lines: list[str] | None = None) -> str:
     body_lines = lines or [
         f"{esc(SITE.get('site_name'))} · {esc(SITE.get('tagline'))}",
-        "示例项目 · 无广告、无追踪。",
+        "每日简报 · 无广告、无追踪。",
     ]
     paragraph = "\n".join(f"    <p>{line}</p>" for line in body_lines)
     return f"""  <footer>
@@ -294,7 +294,8 @@ def render_markdown(source: str) -> tuple[str, str, str, dict[str, int], list[tu
                 "市场": "market",
                 "社会": "society",
             }.get(current_section, re.sub(r"\W+", "-", current_section).strip("-") or "section")
-            sections.append((current_section, section_id))
+            if current_section != "使用说明":
+                sections.append((current_section, section_id))
             output.append(
                 f'<section class="brief-section" id="{html.escape(section_id)}">'
                 f'<header class="section-header"><span>{html.escape(current_section)}</span></header>'
@@ -372,7 +373,7 @@ def brief_page(latest: dict[str, object], archive: list[dict[str, object]]) -> s
     footer = render_footer(
         "简报",
         lines=[
-            f"{esc(site_name)} · 示例内容，来自可编辑的 Markdown。",
+            f"{esc(site_name)} · 每日简报归档，由可编辑的 Markdown 构建。",
             "仅供信息整理，不构成投资、法律或医疗建议。",
         ],
     )
@@ -398,7 +399,7 @@ def brief_page(latest: dict[str, object], archive: list[dict[str, object]]) -> s
       <div class="meta" aria-label="日报信息">
         <span id="itemCount">{total} 条要闻</span>
         <span id="topCount">{int(stats.get('重磅', 0))} 条今日重磅</span>
-        <span>示例内容 · AI 辅助整理</span>
+        <span>公开信息 · AI 辅助整理</span>
       </div>
     </section>
 
