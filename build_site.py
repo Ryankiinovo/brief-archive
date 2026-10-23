@@ -402,7 +402,7 @@ def brief_page(latest: dict[str, object], archive: list[dict[str, object]]) -> s
       </div>
     </section>
 
-    <div class="reading-layout">
+    <div class="brief-layout">
       <nav class="section-nav" aria-label="日报目录">{section_nav}</nav>
       <article class="brief" id="brief" aria-live="polite">{latest['body']}</article>
     </div>
