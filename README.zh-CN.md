@@ -1,5 +1,7 @@
 # 每日简报档案 · daily-brief
 
+[English](README.md) · **简体中文**
+
 把每日简报整理成一套可检索、可自托管的静态页面。
 
 ![预览](assets/preview.png)

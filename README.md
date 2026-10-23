@@ -1,5 +1,7 @@
 # daily-brief
 
+**English** · [简体中文](README.zh-CN.md)
+
 Turn daily news briefs into a searchable, self-hostable static archive.
 
 ![Preview](assets/preview.png)
