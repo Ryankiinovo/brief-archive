@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a static daily-brief archive plus a reading-excerpt page.
+"""Build a static daily-brief archive (single-topic demo: briefs only).
 
 Everything is plain Python 3 and the standard library. Run:
     python3 build_site.py
@@ -15,25 +15,22 @@ import re
 import shutil
 from pathlib import Path
 
-from reading_archive import collect_excerpts, parse_stats, render_body
 
 ROOT = Path(__file__).resolve().parent
 CONTENT = ROOT / "content"
 BRIEFS = CONTENT / "briefs"
 ASSETS = ROOT / "site"
 DIST = ROOT / "dist"
-STATS = CONTENT / "stats.md"
 
 LINK_RE = re.compile(r"\[([^\]]+)\]\((https?://[^)]+)\)")
 BRIEF_NAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
-NAV = [("简报", "./"), ("读书", "reading.html"), ("关于", "about.html")]
+NAV = [("简报", "./"), ("关于", "about.html")]
 
 DEFAULT_SITE: dict[str, object] = {
     "site_name": "简报档案",
     "owner": "Your Name",
-    "tagline": "每日新闻简报与阅读摘录",
-    "intro": "把每日简报、读过的书和划线摘录整理成可检索的静态档案。",
-    "reading_intro": "从微信读书同步的划线摘录与原创批注。",
+    "tagline": "每日新闻简报",
+    "intro": "把每日简报整理成可检索、可自托管的静态档案。",
     "links": [],
 }
 SITE: dict[str, object] = dict(DEFAULT_SITE)
@@ -418,44 +415,6 @@ def brief_page(latest: dict[str, object], archive: list[dict[str, object]]) -> s
 </html>"""
 
 
-def load_books() -> list[dict[str, object]]:
-    path = CONTENT / "reading.json"
-    if not path.exists():
-        return []
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return []
-    books = payload.get("books") if isinstance(payload, dict) else None
-    return books if isinstance(books, list) else []
-
-
-def reading_page(books: list[dict[str, object]], stats: dict[str, object]) -> str:
-    excerpts = collect_excerpts(books)
-    body = render_body(books, excerpts, stats, SITE)
-    as_of = str(stats.get("asOf") or "")
-    note_count = sum(1 for row in excerpts if row.get("note"))
-    description = (
-        f"把微信读书里的划线、批注和阅读时长整理成可检索的档案：{len(books)} 本书、"
-        f"{len(excerpts)} 条摘录、{note_count} 条批注。"
-    )
-    footer = [
-        f"阅读档案 · 统计截至 {as_of}" if as_of else "阅读档案",
-        "全部摘录原文仅作对照，版权归原作者；批注为个人阅读记录。",
-    ]
-    return render_page(
-        title="读书 · 阅读档案",
-        description=description,
-        active="读书",
-        body=body,
-        main_class="reading-shell",
-        brand_sub="Archive",
-        body_class="reading-page",
-        extra_head='  <link rel="stylesheet" href="assets/reading.css">',
-        footer_lines=footer,
-    )
-
-
 def about_page() -> str:
     site = SITE
     path = CONTENT / "about.md"
@@ -481,7 +440,6 @@ def about_page() -> str:
           <h2>继续看</h2>
           <ul class="side-links">
             <li><a href="./">每日简报</a></li>
-            <li><a href="reading.html">读书摘录</a></li>
           </ul>
         </section>
       </aside>
@@ -496,7 +454,7 @@ def about_page() -> str:
 
 def add_asset_versions() -> dict[str, str]:
     versions: dict[str, str] = {}
-    for relative in ("assets/styles.css", "assets/app.js", "assets/reading.css"):
+    for relative in ("assets/styles.css", "assets/app.js"):
         asset = DIST / relative
         if asset.exists():
             versions[relative] = hashlib.sha256(asset.read_bytes()).hexdigest()[:10]
@@ -515,7 +473,7 @@ def check_links() -> list[str]:
         target = DIST / "index.html" if href == "./" else DIST / href
         if not target.exists():
             missing.append(f"{label} → {href}")
-    for asset in ("assets/styles.css", "assets/app.js", "assets/reading.css"):
+    for asset in ("assets/styles.css", "assets/app.js"):
         if not (DIST / asset).exists():
             missing.append(asset)
     return missing
@@ -527,14 +485,11 @@ def main() -> int:
     briefs = collect_briefs()
     if not briefs:
         raise SystemExit("未找到简报：请在 content/briefs/ 放 YYYY-MM-DD*.md")
-    books = load_books()
-    stats = parse_stats(STATS)
-
     if DIST.exists():
         shutil.rmtree(DIST)
     (DIST / "assets").mkdir(parents=True)
     (DIST / "data").mkdir(parents=True)
-    for name in ("styles.css", "app.js", "reading.css"):
+    for name in ("styles.css", "app.js"):
         shutil.copy2(ASSETS / name, DIST / "assets" / name)
 
     archive = [
@@ -551,7 +506,6 @@ def main() -> int:
             json.dumps(item, ensure_ascii=False), encoding="utf-8"
         )
     (DIST / "index.html").write_text(brief_page(briefs[0], archive), encoding="utf-8")
-    (DIST / "reading.html").write_text(reading_page(books, stats), encoding="utf-8")
     (DIST / "about.html").write_text(about_page(), encoding="utf-8")
     (DIST / "robots.txt").write_text("User-agent: *\nAllow: /\n", encoding="utf-8")
 
@@ -561,7 +515,7 @@ def main() -> int:
         print("链接自检失败：\n  " + "\n  ".join(missing))
         return 1
     print(f"Built {len(briefs)} briefs; latest={briefs[0]['date']}")
-    print(f"Pages: reading={len(books)} books/{len(collect_excerpts(books))} excerpts; about=1")
+    print("Pages: index=1 about=1")
     return 0
 
 

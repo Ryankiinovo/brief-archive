@@ -1,20 +1,20 @@
-# brief-archive
+# daily-brief
 
-A small static-site generator for daily briefs and a personal reading archive, built with the Python standard library.
+Turn daily news briefs into a searchable, self-hostable static archive.
 
-![preview](assets/preview.png)
+![Preview](assets/preview.png)
 
-Live demo: <https://ryankiinovo.github.io/brief-archive/>
+Live demo: <https://ryankiinovo.github.io/daily-brief/>
 
-No Node, database, or frontend framework is required. The output is plain HTML / CSS / JS that can be hosted anywhere.
+Plain Python 3 standard library — no Node, no database, no frontend framework. The output is static HTML / CSS / JS you can host anywhere.
+
+> This repo does one thing: daily briefs. The personal reading archive (highlights, notes, stats) lives in a separate repo: [weread-brief](https://github.com/Ryankiinovo/weread-brief).
 
 ## Features
 
-- **Daily briefs**: the latest issue on the homepage, split into sections, with an archive switcher.
-- **Reading excerpts**: timeline and by-book views, filters for month / book / chapter, 20 excerpts per page, filter state kept in the URL.
-- **Reading stats**: lifetime time, books read / finished, notes, a yearly chart, and the current year's monthly distribution.
-- **Content and presentation separated**: briefs are Markdown, excerpts are JSON, stats are Markdown tables.
-- **No tracking**: no third-party scripts, fonts, or analytics.
+- **Daily briefs**: the homepage renders the latest issue, split into sections; a dropdown switches between past issues.
+- **Content separated from presentation**: briefs are Markdown; replace `content/briefs/` and rebuild.
+- **No tracking**: no third-party scripts, fonts or analytics.
 
 ## Quick start
 
@@ -31,20 +31,27 @@ Open <http://127.0.0.1:8000/>.
 python3 -m unittest discover -s tests -v
 ```
 
-The suite copies the builder and sample content into a temporary directory, rebuilds the site, and checks the rendered brief, the reading page counts, the about page, and that no private markers leak into the output.
+The suite copies the build script and sample content into a temp directory, rebuilds, and checks brief rendering, the single-topic page set, the about page, and that no private markers leak into the output.
+
+Build output:
+
+```text
+dist/
+  index.html          latest issue
+  about.html          about page
+  data/*.json         structured data per issue (archive switching)
+  assets/             styles and scripts
+```
 
 ## Layout
 
 ```text
 build_site.py           build entry: read content, render pages, write dist/
-reading_archive.py      renderer for the reading page
-site/                   CSS and frontend JS, copied into dist/assets/
+site/                   styles and frontend scripts (copied into dist/assets/)
 content/
-  site.json             site name, intro, owner
-  about.md              about page
+  site.json             site name, intro, nav copy
+  about.md              about page body
   briefs/               daily briefs as Markdown (YYYY-MM-DD*.md)
-  reading.json          books, chapters, dates, quotes, notes
-  stats.md              reading stats tables and monthly time
 tests/                  build smoke tests (unittest)
 ```
 
@@ -60,92 +67,47 @@ created: 2026-10-20
 
 # Daily brief · 2026-10-20
 
-> One-line summary of the day.
+> Today: one sentence covering the two or three things that matter.
 
 ## Top stories
 
-### A headline
+### Headline
 
-A short factual summary.
+One or two paragraphs of facts.
 
 Why it matters: your reasoning.
 
-AI note: your judgment, counterpoint, or risk.
+Editor note: your judgement, counterpoints, risks.
 
-Source: [Example](https://example.com/news)
-
----
-
-## AI
-
-### Another item
-
-Body.
-
-AI note: ...
-
-Source: [Example](https://example.com/ai)
+Source (example): [Example](https://example.com/news)
 ```
 
-The builder removes frontmatter, uses the first H1 as the page title, the blockquote as the lead, H2 as sections, and H3 as news items. `Why it matters:`, `AI note:`, and `Source:` are styled specially.
+Conventions:
 
-## Reading data
+- The H1 becomes the page title; the blockquote becomes the lead.
+- H2 splits sections; "Top stories / AI / Policy / Market / Society" are recognised, unknown headings fall into the body.
+- H3 is one news item; `Why it matters:`, `Editor note:` and `Source (...):` lines get dedicated styling.
+- Frontmatter can be any YAML-ish key/value pairs; it is stripped at build time.
 
-`content/reading.json`:
+## Make it yours
 
-```json
-{
-  "updated": "2026-10-20",
-  "source": "sample data",
-  "filter": { "mode": "all", "dedupe": "book+quote" },
-  "books": [
-    {
-      "title": "Book title",
-      "author": "Author",
-      "last_read_date": "2026-10-14",
-      "chapters": ["Chapter 1"],
-      "source_highlight_count": 5,
-      "highlight_count": 5,
-      "note_count": 2,
-      "readingMinutes": 185,
-      "status": "reading",
-      "progress": 62,
-      "highlights": [
-        {
-          "chapter": "Chapter 1",
-          "date": "2026-10-14",
-          "text": "Highlighted passage",
-          "note": "Optional note"
-        }
-      ]
-    }
-  ]
-}
-```
-
-Lifetime time, books read / finished, notes, and the yearly chart come from `content/stats.md`. The two sources use different scopes, so the page labels them separately and never adds them together.
-
-## Replace the sample content
-
-1. Edit `content/site.json`.
-2. Replace `content/briefs/`.
-3. Replace `content/reading.json` and `content/stats.md`.
-4. Optionally replace `content/about.md`.
-5. Run `python3 build_site.py`.
+1. Edit `content/site.json` (site name, intro, signature).
+2. Replace `content/briefs/` with your own briefs.
+3. Optionally replace `content/about.md`.
+4. Run `python3 build_site.py`.
 
 ## Deploy
 
-`dist/` is a static directory. Nginx, Caddy, GitHub Pages, and Cloudflare Pages all work. The included `.github/workflows/pages.yml` can publish the demo through GitHub Actions.
+`dist/` is a plain static directory: Nginx, Caddy, GitHub Pages, Cloudflare Pages all work. The repo ships `.github/workflows/pages.yml`; enable GitHub Actions as the Pages source to publish the demo.
 
-## Privacy and copyright
+## Privacy
 
-All books, authors, quotes, notes, and stats in this repository are sample data and do not correspond to real publications. Before publishing real data, make sure you have the right to publish the text, that quoted passages remain credited to their authors, and that no private information is included.
+All news items and source links in this repo are samples. Before publishing real briefs, make sure they contain no personal data, account traces or unpublished judgements.
 
 ## Limitations
 
-- No search, auth, comments, or admin UI; rebuild after content changes.
-- The brief parser targets the structure above, not arbitrary Markdown.
-- Stats are maintained as Markdown tables; there is no platform API sync.
+- No search, login, comments or admin UI; content changes require a rebuild.
+- The parser targets the structure above; it is not a general Markdown renderer.
 
 ## License
 
