@@ -100,9 +100,11 @@ Conventions:
 
 `dist/` is a plain static directory: Nginx, Caddy, GitHub Pages, Cloudflare Pages all work. The repo ships `.github/workflows/pages.yml`; enable GitHub Actions as the Pages source to publish the demo.
 
-## Privacy
+## Data
 
-All news items and source links in this repo are samples. Before publishing real briefs, make sure they contain no personal data, account traces or unpublished judgements.
+The 26 issues in this repo are **real published briefs** (from 2026-09-15 on), curated from public sources each day: facts, why they matter, and editorial judgement. Source links point to public reports and remain the property of their authors; the site loads no third-party scripts or analytics.
+
+To run your own archive, replace `content/briefs/` and rebuild.
 
 ## Limitations
 

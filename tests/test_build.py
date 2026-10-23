@@ -37,13 +37,17 @@ class BuildTest(unittest.TestCase):
 
     def test_build_succeeds(self):
         self.assertEqual(self.result.returncode, 0, self.result.stderr)
-        self.assertIn("Built 3 briefs", self.result.stdout)
+        self.assertIn("Built ", self.result.stdout)
         self.assertIn("Pages: index=1 about=1", self.result.stdout)
+        self.assertGreater(len(list((ROOT / "content" / "briefs").glob("*.md"))), 0)
 
     def test_latest_brief_is_rendered(self):
-        self.assertIn("10月20日新闻简报", self.index)
-        self.assertIn("示例科技发布支持长上下文的模型", self.index)
-        self.assertIn("5 条要闻", self.index)
+        newest = max(p.stem for p in (ROOT / "content" / "briefs").glob("*.md"))
+        month, day = int(newest[5:7]), int(newest[8:10])
+        self.assertIn(f"{month}月{day}日新闻简报", self.index)
+        self.assertIn('id="archiveSelect"', self.index)
+        for section in ("今日重磅", "AI", "市场", "社会"):
+            self.assertIn(section, self.index)
 
     def test_site_is_single_topic(self):
         self.assertFalse((self.work / "dist/reading.html").exists())
@@ -51,7 +55,8 @@ class BuildTest(unittest.TestCase):
         self.assertNotIn("读书", self.index)
 
     def test_about_page_exists(self):
-        self.assertIn("关于这个项目", self.about)
+        self.assertIn('id="aboutTitle"', self.about)
+        self.assertIn("关于", self.about)
 
     def test_public_output_has_no_private_markers(self):
         joined = self.index + self.about
